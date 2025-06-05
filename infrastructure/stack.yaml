@@ -51,7 +51,7 @@ Resources:
   ApiGateway:
     Type: "AWS::ApiGateway::RestApi"
     Properties:
-      Name: "task-master-apigw"
+      Name: "go-apigw"
 
   ApiGatewayResourceStack:
     DependsOn: [ApiGateway]
@@ -59,7 +59,7 @@ Resources:
     Properties:
       RestApiId: !Ref ApiGateway
       ParentId: !GetAtt ApiGateway.RootResourceId
-      PathPart: "stack"
+      PathPart: "hello"
 
   ApiGatewayStackMethodHello:
     DependsOn: [LambdaFunctionHello, ApiGateway, ApiGatewayResourceStack]
@@ -68,7 +68,7 @@ Resources:
       RestApiId: !Ref ApiGateway
       ResourceId: !Ref ApiGatewayResourceStack
       AuthorizationType: NONE
-      HttpMethod: POST
+      HttpMethod: GET
       Integration:
         IntegrationHttpMethod: POST
         Type: AWS_PROXY
