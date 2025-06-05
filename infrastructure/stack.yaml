@@ -12,20 +12,20 @@ Parameters:
 Resources:
   LambdaFunctionHello:
     Type: "AWS::Lambda::Function"
-    Description: Handles scaling up of ECS and ALB stacks
+    Description: Simple lambda for replying 'Hello World'
     Properties:
-      FunctionName: "task-master-service-create"
-      Handler: app/src/handler/stack_handler.handle_create
-      Runtime: python3.13
+      FunctionName: "go-apigw-lambda"
+      Runtime: provided.al2023
+      Handler: bootstrap
       MemorySize: 128
       Code:
         S3Bucket: "eb-solutions-code-deployment"
-        S3Key: !Sub "services/task-master/${S3KeyPath}/service.zip"
+        S3Key: !Sub "projects/go/apigw-lambda/${S3KeyPath}/service.zip"
       Role: arn:aws:iam::654918520080:role/go-apigw-lambda-role
       Timeout: 60
       Tags:
         - Key: CostCenter
-          Value: services.task-master
+          Value: projects.go.apigw-lambda
 
   LambdaPermissionHello:
     DependsOn: [LambdaFunctionHello]
