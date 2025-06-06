@@ -2,7 +2,7 @@ name: Pull Request
 on:
   push:
     branches:
-      - test
+      - feature/multiple-deployed-handlers
 
 jobs:
   Publish-Lambda-To-Cloud:
@@ -36,8 +36,11 @@ jobs:
       - name: Create Folder uuid
         run: echo "UUID=$(uuidgen)" >> $GITHUB_ENV
 
-      - name: Publish Zip to S3
+      - name: Publish Zip to S3 - GET
         run: aws s3api put-object --bucket eb-solutions-code-deployment --key projects/go/apigw-lambda/$UUID/handler_hello_get.zip --body handler_hello_get.zip
+
+      - name: Publish Zip to S3 - POST
+        run: aws s3api put-object --bucket eb-solutions-code-deployment --key projects/go/apigw-lambda/$UUID/handler_hello_post.zip --body handler_hello_post.zip
 
       - name: Delete Stack
         run: aws cloudformation delete-stack --stack-name go-apigw-lambda-stack
