@@ -20,12 +20,12 @@ zip: zip-handler-hello-get
 
 # Run all tests
 # test:
-	# go test ./...
+# go test ./...
 
 # Format code
 # fmt:
-	# go fmt ./...
+# go fmt ./...
 
 # Clean output binaries
 # clean:
-	# rm -rf bin/
+# rm -rf bin/
