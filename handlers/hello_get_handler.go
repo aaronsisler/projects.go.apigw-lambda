@@ -7,13 +7,16 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 )
 
-func HelloGetHandler(ctx context.Context, req events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
+func HelloGetHandler(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	name := req.QueryStringParameters["name"]
 
 	message := shared.FormatMessage(name)
 
-	return events.APIGatewayV2HTTPResponse{
+	return events.APIGatewayProxyResponse{
 		StatusCode: 200,
-		Body:       "Handler: Hello: GET: " + message,
+		Headers: map[string]string{
+			"Content-Type": "application/json",
+		},
+		Body: "Handler: Hello: GET: " + message,
 	}, nil
 }
