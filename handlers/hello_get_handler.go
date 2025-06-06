@@ -1,17 +1,20 @@
-package main
+package handlers
 
 import (
 	"context"
 	"encoding/json"
 
+	"github.com/aaronsisler/projects.go.apigw-lambda/shared"
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-lambda-go/lambda"
 )
 
-func handler(ctx context.Context, event map[string]interface{}) (events.APIGatewayProxyResponse, error) {
+func HelloGetHandler(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	name := req.QueryStringParameters["name"]
+
+	message := shared.FormatMessage(name)
 
 	responseBody, err := json.Marshal(map[string]string{
-		"message": "Hello, AWS Lambda!",
+		"message": "Handler: Hello: GET: " + message,
 	})
 
 	if err != nil {
@@ -25,8 +28,4 @@ func handler(ctx context.Context, event map[string]interface{}) (events.APIGatew
 		},
 		Body: string(responseBody),
 	}, nil
-}
-
-func main() {
-	lambda.Start(handler)
 }

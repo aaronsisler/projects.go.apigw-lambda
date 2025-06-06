@@ -20,7 +20,7 @@ Resources:
       MemorySize: 128
       Code:
         S3Bucket: "eb-solutions-code-deployment"
-        S3Key: !Sub "projects/go/apigw-lambda/${S3KeyPath}/service.zip"
+        S3Key: !Sub "projects/go/apigw-lambda/${S3KeyPath}/handler_hello_get.zip"
       Role: arn:aws:iam::654918520080:role/go-apigw-lambda-role
       Timeout: 60
       Tags:

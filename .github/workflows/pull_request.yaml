@@ -27,8 +27,8 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Install dependencies
-        run: GOOS=linux GOARCH=amd64 go build -o bootstrap src/main.go
+      - name: Build handlers
+        run: make build
 
-      - name: Zip Up Application
-        run: zip service.zip bootstrap
+      - name: Zip handlers
+        run: make zip
