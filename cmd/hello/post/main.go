@@ -6,5 +6,5 @@ import (
 )
 
 func main() {
-	lambda.Start(hello.HelloGetHandler)
+	lambda.Start(hello.HelloPostHandler)
 }
