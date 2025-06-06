@@ -25,7 +25,7 @@ func HelloPostHandler(ctx context.Context, req events.APIGatewayProxyRequest) (e
 	message := shared.FormatMessage(helloRequest.Name)
 
 	responseBody, err := json.Marshal(map[string]string{
-		"message": "Handler: Hello: GET: " + message,
+		"message": "Handler: Hello: POST: " + message,
 	})
 
 	if err != nil {
