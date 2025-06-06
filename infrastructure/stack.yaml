@@ -16,7 +16,7 @@ Resources:
     Properties:
       FunctionName: "go-apigw-lambda"
       Runtime: provided.al2023
-      Handler: bootstrap
+      Handler: handler_hello_get
       MemorySize: 128
       Code:
         S3Bucket: "eb-solutions-code-deployment"
