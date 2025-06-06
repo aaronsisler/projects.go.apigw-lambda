@@ -18,22 +18,10 @@ zip-handler-hello-post:
 
 # Build all handlers
 build:
-	build-handler-hello-get \
-	build-handler-hello-post
+	make build-handler-hello-get
+	make build-handler-hello-post
 
 # Zip all handlers
 zip:
-	zip-handler-hello-get \
-	zip-handler-hello-post
-
-# Run all tests
-# test:
-# go test ./...
-
-# Format code
-# fmt:
-# go fmt ./...
-
-# Clean output binaries
-# clean:
-# rm -rf bin/
+	make zip-handler-hello-get
+	make zip-handler-hello-post
