@@ -31,7 +31,7 @@ jobs:
         run: make build
 
       - name: Zip Up Handler
-        run: zip handler_hello_get.zip bin/handler_hello_get/bootstrap
+        run: zip handler_hello_get.zip -j bin/handler_hello_get/bootstrap
 
       - name: Create Folder uuid
         run: echo "UUID=$(uuidgen)" >> $GITHUB_ENV
