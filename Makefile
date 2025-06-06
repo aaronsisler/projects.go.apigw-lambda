@@ -4,7 +4,10 @@ GOARCH=amd64
 
 # Target to build handler1 Lambda binary
 build-handler-hello-get:
-	GOOS=$(GOOS) GOARCH=$(GOARCH) go build -o bin/handler_hello_get/bootstrap ./cmd/hello/get
+GOOS=$(GOOS) GOARCH=$(GOARCH) go build -o bin/handler_hello_get/bootstrap ./cmd/hello/get
+
+zip-handler-hello-get:
+zip handler_hello_get.zip -j bin/handler_hello_get/bootstrap
 
 # # Target to build handler2 Lambda binary
 # build-handler2:
@@ -12,6 +15,7 @@ build-handler-hello-get:
 
 # Build all handlers
 build: build-handler-hello-get
+zip: zip-handler-hello-get
 
 # Run all tests
 # test:
