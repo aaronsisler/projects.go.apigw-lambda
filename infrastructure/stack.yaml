@@ -49,7 +49,7 @@ Resources:
       PathPart: "hello"
 
   ApiGatewayStackMethodHelloGet:
-    DependsOn: [LambdaFunctionHelloGet, ApiGateway, ApiGatewayResourceStack]
+    DependsOn: [HelloGetLambdaStack, ApiGateway, ApiGatewayResourceStack]
     Type: "AWS::ApiGateway::Method"
     Properties:
       RestApiId: !Ref ApiGateway
@@ -75,7 +75,7 @@ Resources:
         Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HelloPostLambdaStack.Outputs.LambdaArn}/invocations
 
   ApiGatewayDeployment:
-    DependsOn: [HelloGetLambdaStack, ApiGatewayStackMethodHelloPost]
+    DependsOn: [ApiGatewayStackMethodHelloGet, ApiGatewayStackMethodHelloPost]
     Type: AWS::ApiGateway::Deployment
     Properties:
       RestApiId: !Ref ApiGateway
