@@ -4,7 +4,7 @@ AWSTemplateFormatVersion: "2010-09-09"
 Parameters:
   TemplateFolder:
     Type: String
-    Default: https://eb-solutions-code-deployment.s3.amazonaws.com/projects/go/apigw-lambda
+    Default: https://eb-solutions-code-deployment.s3.us-east-1.amazonaws.com/projects/go/apigw-lambda
   S3KeyPath:
     Type: String
   HostedZoneId:
