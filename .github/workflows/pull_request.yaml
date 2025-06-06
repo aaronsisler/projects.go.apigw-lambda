@@ -12,10 +12,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Python
-        uses: actions/setup-python@v5
+      - name: Setup Go
+        uses: actions/setup-go@v5
         with:
-          python-version: "3.13"
+          go-version: 1.24.x
+
+      - name: Display Go version
+        run: go version
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -25,7 +28,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Install dependencies
-        run: pip install -r requirements.txt --target ./app
+        run: GOOS=linux GOARCH=amd64 go build -o bootstrap src/main.go
 
       - name: Zip Up Application
-        run: zip service.zip -r ./app
+        run: zip service.zip bootstrap
