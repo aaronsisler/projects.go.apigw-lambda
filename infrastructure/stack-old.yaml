@@ -1,0 +1,159 @@
+Description: API Gateway and lambda
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+  S3KeyPath:
+    Type: String
+  HostedZoneId:
+    Type: String
+    Description: "Route 53 Hosted Zone ID for the domain"
+    Default: "ZR2VAHLVW389H"
+
+Resources:
+  LambdaFunctionHelloGet:
+    Type: "AWS::Lambda::Function"
+    Description: Simple lambda for replying 'Hello World'
+    Properties:
+      FunctionName: "go-apigw-hello-get"
+      Runtime: provided.al2023
+      Handler: bootstrap
+      MemorySize: 128
+      Code:
+        S3Bucket: "eb-solutions-code-deployment"
+        S3Key: !Sub "projects/go/apigw-lambda/${S3KeyPath}/handler_hello_get.zip"
+      Role: arn:aws:iam::654918520080:role/go-apigw-lambda-role
+      Timeout: 60
+      Tags:
+        - Key: CostCenter
+          Value: projects.go.apigw-lambda
+
+  LambdaFunctionHelloPost:
+    Type: "AWS::Lambda::Function"
+    Description: Simple lambda for replying 'Hello World'
+    Properties:
+      FunctionName: "go-apigw-hello-post"
+      Runtime: provided.al2023
+      Handler: bootstrap
+      MemorySize: 128
+      Code:
+        S3Bucket: "eb-solutions-code-deployment"
+        S3Key: !Sub "projects/go/apigw-lambda/${S3KeyPath}/handler_hello_post.zip"
+      Role: arn:aws:iam::654918520080:role/go-apigw-lambda-role
+      Timeout: 60
+      Tags:
+        - Key: CostCenter
+          Value: projects.go.apigw-lambda
+
+  LambdaPermissionHelloGet:
+    DependsOn: [LambdaFunctionHelloGet]
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt LambdaFunctionHelloGet.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        !Join [
+          "",
+          [
+            "arn:aws:execute-api:",
+            Ref: "AWS::Region",
+            ":",
+            Ref: "AWS::AccountId",
+            ":",
+            Ref: "ApiGateway",
+            "/*",
+          ],
+        ]
+
+  LambdaPermissionHelloPost:
+    DependsOn: [LambdaFunctionHelloPost]
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt LambdaFunctionHelloPost.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        !Join [
+          "",
+          [
+            "arn:aws:execute-api:",
+            Ref: "AWS::Region",
+            ":",
+            Ref: "AWS::AccountId",
+            ":",
+            Ref: "ApiGateway",
+            "/*",
+          ],
+        ]
+
+  ApiGateway:
+    Type: "AWS::ApiGateway::RestApi"
+    Properties:
+      Name: "go-apigw"
+
+  ApiGatewayResourceStack:
+    DependsOn: [ApiGateway]
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ParentId: !GetAtt ApiGateway.RootResourceId
+      PathPart: "hello"
+
+  ApiGatewayStackMethodHelloGet:
+    DependsOn: [LambdaFunctionHelloGet, ApiGateway, ApiGatewayResourceStack]
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref ApiGatewayResourceStack
+      AuthorizationType: NONE
+      HttpMethod: GET
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunctionHelloGet.Arn}/invocations
+
+  ApiGatewayStackMethodHelloPost:
+    DependsOn: [LambdaFunctionHelloPost, ApiGateway, ApiGatewayResourceStack]
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref ApiGatewayResourceStack
+      AuthorizationType: NONE
+      HttpMethod: POST
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunctionHelloPost.Arn}/invocations
+
+  ApiGatewayDeployment:
+    DependsOn: [ApiGatewayStackMethodHelloGet, ApiGatewayStackMethodHelloPost]
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId: !Ref ApiGateway
+      StageName: prod
+
+  DomainName:
+    Type: "AWS::ApiGateway::DomainName"
+    Properties:
+      # This is the *.otterandcow.com ACM Cert ARN
+      CertificateArn: arn:aws:acm:us-east-1:654918520080:certificate/b4d67bb3-5d56-4d5e-bf83-cdf7cb04d4ba
+      DomainName: go.otterandcow.com
+
+  Mapping:
+    DependsOn: [ApiGateway, DomainName]
+    Type: "AWS::ApiGateway::BasePathMapping"
+    Properties:
+      DomainName: !Ref DomainName
+      RestApiId: !Ref ApiGateway
+      Stage: prod
+
+  ApiGwRoute53:
+    DependsOn: [DomainName]
+    Type: "AWS::Route53::RecordSet"
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: go.otterandcow.com.
+      Type: A
+      AliasTarget:
+        HostedZoneId: !GetAtt DomainName.DistributionHostedZoneId
+        DNSName: !GetAtt DomainName.DistributionDomainName

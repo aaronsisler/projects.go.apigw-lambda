@@ -2,7 +2,7 @@ name: Pull Request
 on:
   push:
     branches:
-      - test
+      - feature/parent-infra-stack
 
 jobs:
   Publish-Lambda-To-Cloud:
@@ -35,6 +35,9 @@ jobs:
 
       - name: Create Folder uuid
         run: echo "UUID=$(uuidgen)" >> $GITHUB_ENV
+
+      - name: Publish infrastructure Templates
+        run: aws s3api put-object --bucket eb-solutions-code-deployment --key projects/go/apigw-lambda/lambda-stack-template.yaml --body infrastructure/lambda-stack-template.yaml
 
       - name: Publish Zip to S3 - GET
         run: aws s3api put-object --bucket eb-solutions-code-deployment --key projects/go/apigw-lambda/$UUID/handler_hello_get.zip --body handler_hello_get.zip

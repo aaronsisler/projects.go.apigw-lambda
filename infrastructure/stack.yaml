@@ -2,6 +2,9 @@ Description: API Gateway and lambda
 AWSTemplateFormatVersion: "2010-09-09"
 
 Parameters:
+  TemplateFolder:
+    Type: String
+    Default: https://eb-solutions-code-deployment.s3.amazonaws.com/projects/go/apigw-lambda
   S3KeyPath:
     Type: String
   HostedZoneId:
@@ -10,86 +13,32 @@ Parameters:
     Default: "ZR2VAHLVW389H"
 
 Resources:
-  LambdaFunctionHelloGet:
-    Type: "AWS::Lambda::Function"
-    Description: Simple lambda for replying 'Hello World'
-    Properties:
-      FunctionName: "go-apigw-hello-get"
-      Runtime: provided.al2023
-      Handler: bootstrap
-      MemorySize: 128
-      Code:
-        S3Bucket: "eb-solutions-code-deployment"
-        S3Key: !Sub "projects/go/apigw-lambda/${S3KeyPath}/handler_hello_get.zip"
-      Role: arn:aws:iam::654918520080:role/go-apigw-lambda-role
-      Timeout: 60
-      Tags:
-        - Key: CostCenter
-          Value: projects.go.apigw-lambda
-
-  LambdaFunctionHelloPost:
-    Type: "AWS::Lambda::Function"
-    Description: Simple lambda for replying 'Hello World'
-    Properties:
-      FunctionName: "go-apigw-hello-post"
-      Runtime: provided.al2023
-      Handler: bootstrap
-      MemorySize: 128
-      Code:
-        S3Bucket: "eb-solutions-code-deployment"
-        S3Key: !Sub "projects/go/apigw-lambda/${S3KeyPath}/handler_hello_post.zip"
-      Role: arn:aws:iam::654918520080:role/go-apigw-lambda-role
-      Timeout: 60
-      Tags:
-        - Key: CostCenter
-          Value: projects.go.apigw-lambda
-
-  LambdaPermissionHelloGet:
-    DependsOn: [LambdaFunctionHelloGet]
-    Type: AWS::Lambda::Permission
-    Properties:
-      FunctionName: !GetAtt LambdaFunctionHelloGet.Arn
-      Action: lambda:InvokeFunction
-      Principal: apigateway.amazonaws.com
-      SourceArn:
-        !Join [
-          "",
-          [
-            "arn:aws:execute-api:",
-            Ref: "AWS::Region",
-            ":",
-            Ref: "AWS::AccountId",
-            ":",
-            Ref: "ApiGateway",
-            "/*",
-          ],
-        ]
-
-  LambdaPermissionHelloPost:
-    DependsOn: [LambdaFunctionHelloPost]
-    Type: AWS::Lambda::Permission
-    Properties:
-      FunctionName: !GetAtt LambdaFunctionHelloPost.Arn
-      Action: lambda:InvokeFunction
-      Principal: apigateway.amazonaws.com
-      SourceArn:
-        !Join [
-          "",
-          [
-            "arn:aws:execute-api:",
-            Ref: "AWS::Region",
-            ":",
-            Ref: "AWS::AccountId",
-            ":",
-            Ref: "ApiGateway",
-            "/*",
-          ],
-        ]
-
   ApiGateway:
     Type: "AWS::ApiGateway::RestApi"
     Properties:
       Name: "go-apigw"
+
+  HelloGetLambdaStack:
+    DependsOn: [ApiGateway]
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${TemplateFolder}/lambda-stack-template.yml"
+      Parameters:
+        LambdaFunctionName: "go-apigw-hello-get"
+        LambdaS3Key: !Sub "projects/go/apigw-lambda/${S3KeyPath}/handler_hello_get.zip"
+        LambdaRoleArn: arn:aws:iam::654918520080:role/go-apigw-lambda-role
+        LambdaPermissionSourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*
+
+  HelloPostLambdaStack:
+    DependsOn: [ApiGateway]
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${TemplateFolder}/lambda-stack-template.yml"
+      Parameters:
+        LambdaFunctionName: "go-apigw-hello-post"
+        LambdaS3Key: !Sub "projects/go/apigw-lambda/${S3KeyPath}/handler_hello_post.zip"
+        LambdaRoleArn: arn:aws:iam::654918520080:role/go-apigw-lambda-role
+        LambdaPermissionSourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*
 
   ApiGatewayResourceStack:
     DependsOn: [ApiGateway]
@@ -110,7 +59,7 @@ Resources:
       Integration:
         IntegrationHttpMethod: POST
         Type: AWS_PROXY
-        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunctionHelloGet.Arn}/invocations
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HelloGetLambdaStack.Outputs.LambdaArn}/invocations
 
   ApiGatewayStackMethodHelloPost:
     DependsOn: [LambdaFunctionHelloPost, ApiGateway, ApiGatewayResourceStack]
@@ -123,7 +72,7 @@ Resources:
       Integration:
         IntegrationHttpMethod: POST
         Type: AWS_PROXY
-        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunctionHelloPost.Arn}/invocations
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HelloPostLambdaStack.Outputs.LambdaArn}/invocations
 
   ApiGatewayDeployment:
     DependsOn: [ApiGatewayStackMethodHelloGet, ApiGatewayStackMethodHelloPost]
