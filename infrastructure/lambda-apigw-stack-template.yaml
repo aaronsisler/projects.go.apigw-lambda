@@ -44,7 +44,7 @@ Resources:
     DependsOn: [LambdaFunction]
     Type: "AWS::ApiGateway::Method"
     Properties:
-      RestApiId: !Ref ApiGateway
+      RestApiId: !Ref ApiGatewayId
       ResourceId: !Ref ApiGatewayResourceId
       AuthorizationType: NONE
       HttpMethod: GET
