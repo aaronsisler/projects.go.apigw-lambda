@@ -10,6 +10,10 @@ Parameters:
     Type: String
   LambdaPermissionSourceArn:
     Type: String
+  ApiGatewayId:
+    Type: String
+  ApiGatewayResourceId:
+    Type: String
 
 Resources:
   LambdaFunction:
@@ -36,6 +40,15 @@ Resources:
       Principal: apigateway.amazonaws.com
       SourceArn: !Ref LambdaPermissionSourceArn
 
-Outputs:
-  LambdaArn:
-    Value: !GetAtt LambdaFunction.Arn
+  ApiGatewayStackMethod:
+    DependsOn: [LambdaFunction]
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref ApiGatewayResourceId
+      AuthorizationType: NONE
+      HttpMethod: GET
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations
