@@ -27,6 +27,14 @@ Resources:
       ParentId: !GetAtt ApiGateway.RootResourceId
       PathPart: "hello"
 
+  UserApiGatewayResourceStack:
+    DependsOn: [ApiGateway]
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ParentId: !GetAtt ApiGateway.RootResourceId
+      PathPart: "user"
+
   HelloGetLambdaStack:
     DependsOn: [ApiGateway]
     Type: AWS::CloudFormation::Stack
@@ -55,8 +63,22 @@ Resources:
         ApiGatewayResourceId: !Ref HelloApiGatewayResourceStack
         ApiHttpMethod: POST
 
+  UserGetLambdaStack:
+    DependsOn: [ApiGateway]
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${TemplateFolder}/lambda-apigw-stack-template.yaml"
+      Parameters:
+        LambdaFunctionName: "go-apigw-user-get"
+        LambdaS3Key: !Sub "projects/go/apigw-lambda/${S3KeyPath}/handler_user_get.zip"
+        LambdaRoleArn: arn:aws:iam::654918520080:role/go-apigw-lambda-role
+        LambdaPermissionSourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*
+        ApiGatewayId: !Ref ApiGateway
+        ApiGatewayResourceId: !Ref UserApiGatewayResourceStack
+        ApiHttpMethod: GET
+
   ApiGatewayDeployment:
-    DependsOn: [HelloGetLambdaStack, HelloPostLambdaStack]
+    DependsOn: [HelloGetLambdaStack, HelloPostLambdaStack, UserGetLambdaStack]
     Type: AWS::ApiGateway::Deployment
     Properties:
       RestApiId: !Ref ApiGateway
