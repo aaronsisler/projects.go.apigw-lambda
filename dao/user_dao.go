@@ -47,7 +47,7 @@ func (dao *UserDao) GetUserById(ctx context.Context, userId string) (*model.User
 		user.Name = nameAttr.Value
 	}
 
-	if establishmentIdsAttr, ok := result.Item["establishmentIds"].(*types.AttributeValueMemberS); ok {
+	if establishmentIdsAttr, ok := result.Item["establishmentIds"].(*types.AttributeValueMemberSS); ok {
 		user.EstablishmentIds = establishmentIdsAttr.Value
 	}
 
