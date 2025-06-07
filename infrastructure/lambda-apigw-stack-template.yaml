@@ -14,6 +14,8 @@ Parameters:
     Type: String
   ApiGatewayResourceId:
     Type: String
+  ApiHttpMethod:
+    Type: String
 
 Resources:
   LambdaFunction:
@@ -47,7 +49,7 @@ Resources:
       RestApiId: !Ref ApiGatewayId
       ResourceId: !Ref ApiGatewayResourceId
       AuthorizationType: NONE
-      HttpMethod: GET
+      HttpMethod: !Ref ApiHttpMethod
       Integration:
         IntegrationHttpMethod: POST
         Type: AWS_PROXY

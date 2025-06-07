@@ -39,6 +39,7 @@ Resources:
         LambdaPermissionSourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*
         ApiGatewayId: !Ref ApiGateway
         ApiGatewayResourceId: !Ref HelloApiGatewayResourceStack
+        ApiHttpMethod: GET
 
   HelloPostLambdaStack:
     DependsOn: [ApiGateway]
@@ -52,6 +53,7 @@ Resources:
         LambdaPermissionSourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*
         ApiGatewayId: !Ref ApiGateway
         ApiGatewayResourceId: !Ref HelloApiGatewayResourceStack
+        ApiHttpMethod: POST
 
   ApiGatewayDeployment:
     DependsOn: [HelloGetLambdaStack, HelloPostLambdaStack]
