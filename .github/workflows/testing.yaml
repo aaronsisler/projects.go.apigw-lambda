@@ -45,6 +45,9 @@ jobs:
       - name: Publish Zip to S3 - POST
         run: aws s3api put-object --bucket eb-solutions-code-deployment --key projects/go/apigw-lambda/$UUID/handler_hello_post.zip --body handler_hello_post.zip
 
+      - name: Publish Zip to S3 - POST
+        run: aws s3api put-object --bucket eb-solutions-code-deployment --key projects/go/apigw-lambda/$UUID/handler_user_get.zip --body handler_user_get.zip
+
       - name: Delete Stack
         run: aws cloudformation delete-stack --stack-name go-apigw-lambda-stack
 

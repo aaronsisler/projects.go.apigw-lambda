@@ -33,7 +33,7 @@ Resources:
     Properties:
       RestApiId: !Ref ApiGateway
       ParentId: !GetAtt ApiGateway.RootResourceId
-      PathPart: "user"
+      PathPart: "users"
 
   HelloGetLambdaStack:
     DependsOn: [ApiGateway]
